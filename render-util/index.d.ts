@@ -4,6 +4,7 @@ declare namespace RenderUtil {
         render: (html: string, root: HTMLElement, renderOptions?: RenderOptions) => void;
         build: (html: string, buildOptions?: BuildOptions) => string;
         domRef: <T extends Element>() => DomRef<T>;
+        createState: <T>(initialState: T) => [StateObj<T>, (newVal: T) => void];
     }
 
     export interface BuildOptions {
@@ -24,5 +25,15 @@ declare namespace RenderUtil {
         set: string;
     }
 
+    export interface State {
+        value: any;
+        subsList: {elem: HTMLElement, rendered?: boolean, callback?: Function, component?: boolean}[];
+        callbackMap: Map<string, Function>;
+    }
+
     export type CSSOptions = Partial<CSSStyleDeclaration>;
+    export type StateSubsMap = Map<string, State>
+    export type StateObj<T> = { subs: Subs<T>, getState: () => T};
+    export type Subs<T> = (type?: 'inline' | 'block' | 'component' | SubsCallback<T>, callback?: SubsCallback<T>) => string;
+    type SubsCallback<T> = (state: T) => number | string;
 }
