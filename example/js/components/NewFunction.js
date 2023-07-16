@@ -48,7 +48,7 @@ export default function NewFunction() {
             <button onClick="{onNameReset}">리셋</button>
         </p>
     `, {
-        funcPrepare: {
+        eventPrepare: {
             onIncrement,
             onMyObjIncrement: () => {
                 const newObj = myObj.getState();

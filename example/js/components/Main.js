@@ -31,7 +31,7 @@ export default function Main() {
             </p>
         </main>
     `, {
-        funcPrepare: {
+        eventPrepare: {
             onIncrement: onIncrement
         },
         stylePrepare: {

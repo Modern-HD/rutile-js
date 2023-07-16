@@ -120,7 +120,7 @@ const Rutile = {
     build(html, buildOptions) {
         if (!buildOptions) { return html; }
         let htmlStr = html;
-        if (buildOptions.funcPrepare) {
+        if (buildOptions.eventPrepare) {
             replaceTargetFunc.forEach(target => {
                 const regexStr = `${target.origin}="{(.*?)}\"`;
                 const regex = new RegExp(regexStr, 'g');
@@ -129,10 +129,10 @@ const Rutile = {
                     const name = match[1];
                     if (temp && temp === name) continue;
                     temp = name;
-                    if (!buildOptions.funcPrepare[name]) continue;
+                    if (!buildOptions.eventPrepare[name]) continue;
                     const newFuncName = funcIdxGen.next().value;
                     htmlStr = htmlStr.replaceAll(`${target.origin}="{${name}}"`, `data-func_prepare_${target.fix}="${newFuncName}"`);
-                    funcPrepareMap.set(newFuncName, buildOptions.funcPrepare[name]);
+                    funcPrepareMap.set(newFuncName, buildOptions.eventPrepare[name]);
                 }
             });
         }

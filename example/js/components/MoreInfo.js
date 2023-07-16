@@ -16,7 +16,7 @@ export default function MoreInfo({count, onIncrement}) {
             </p>
         </div>
     `, {
-        funcPrepare: {
+        eventPrepare: {
             onIncrement
         }
     })

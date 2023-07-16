@@ -13,7 +13,7 @@ declare namespace Rutile {
     }
 
     export interface BuildOptions {
-        funcPrepare?: {[key: string]: Function};
+        eventPrepare?: {[key: string]: Function};
         stylePrepare?: {[key: string]: CSSOptions};
         domReady?: Function | Array<Function>
     }
