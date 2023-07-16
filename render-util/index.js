@@ -17,8 +17,11 @@ const domRefMap = new Map();
 /** @type {Map<string, Function>} */
 const domReadyMap = new Map();
 
-/** @type {RenderUtil.StateSubsMap} */
-const stateSubsMap = new Map();
+/** @type {RenderUtil.StateMap} */
+const stateMap = new Map();
+
+/** @type {RenderUtil.StateMap} */
+const globalStateMap = new Map();
 
 /**
  * @param {string} keyword
@@ -73,8 +76,9 @@ const renderUtil = {
         rendering.querySelectorAll(`div state-subs`).forEach(el => {
             if (!(el instanceof HTMLElement)) return;
             const stateIdx = el.dataset['dom_subs'];
-            if (!stateIdx) return;
-            const state = stateSubsMap.get(stateIdx);
+            const globalStateKey = el.dataset['dom_global_subs'];
+            if (!(stateIdx || globalStateKey)) return;
+            const state = stateIdx ? stateMap.get(stateIdx) : globalStateMap.get(globalStateKey);
             if (!state) return;
             const isComponent = el.dataset['dom_subs_component'];
             const subsCallbackIdx = el.dataset['dom_subs_callback'];
@@ -92,6 +96,7 @@ const renderUtil = {
             delete el.dataset['dom_subs'];
             if (isComponent) delete el.dataset['dom_subs_component'];
             if (subsCallbackIdx) delete el.dataset['dom_subs_callback'];
+            if (globalStateKey) delete el.dataset['dom_global_subs'];
             if (callback) state.callbackMap.delete(subsCallbackIdx);
         });
         rendering.querySelectorAll('div script').forEach(el => {
@@ -106,10 +111,10 @@ const renderUtil = {
             root.appendChild(el);
         });
         readyFunc.forEach(func => func());
-        stateSubsMap.forEach((value, key) => {
+        stateMap.forEach((value, key) => {
             value.subsList = value.subsList.filter(subs => document.contains(subs.elem));
             if (value.subsList.length !== 0) return;
-            stateSubsMap.delete(key);
+            stateMap.delete(key);
         });
     },
     build(html, buildOptions) {
@@ -171,11 +176,10 @@ const renderUtil = {
         return domRef;
     },
     createState(initialState) {
-
         const stateIdx = stateIdxGen.next().value;
         /** @type {RenderUtil.State} */
         const state = { value: initialState, subsList: [], callbackMap: new Map() };
-        stateSubsMap.set(stateIdx, state);
+        stateMap.set(stateIdx, state);
 
         return [{
             subs(type = 'inline', callback) {
@@ -203,16 +207,81 @@ const renderUtil = {
         }, (newValue) => {
             if (state.value === newValue) return;
             state.value = newValue;
-            state.subsList.forEach(el => {
-                if (el.component) {
-                    renderUtil.render(renderUtil.build(el.callback ? `${el.callback(state.value)}` : state.value), el.elem);
-                } else if (el.callback) {
-                    el.elem.innerText = `${el.callback(state.value)}`;
-                } else {
-                    el.elem.innerText = state.value;
-                }
-            });
+            rerenderState(state);
         }];
+    },
+    createGlobalState(option) {
+        if (globalStateMap.has(option.key)) throw new DuplicateKeyError('globalState에서는 중복된 키를 사용하실 수 없습니다.');
+        /** @type {RenderUtil.State} */
+        const state = { value: option.default, default: option.default, subsList: [], callbackMap: new Map() };
+        globalStateMap.set(option.key, state);
+        const defaultValue = state.default instanceof Object
+                                    ? {...state.default}
+                            : state.default instanceof Array
+                                    ? [...state.default]
+                                    : state.default;
+
+        return {
+            stateKey: option.key,
+            defaultValue
+        }
+    },
+    getGlobalState(atom) {
+        return {
+            subs(type = 'inline', callback) {
+                if (type instanceof Function) {
+                    callback = type;
+                    type = 'inline';
+                }
+                let html = `<state-subs data-dom_global_subs="${atom.stateKey}" ${type === 'block' ? 'style="display: block;"' : ''} `;
+                if (type === 'component') {
+                    html += 'data-dom_subs_component="true" ';
+                }
+                const state = globalStateMap.get(atom.stateKey);
+                if (callback instanceof Function) {
+                    const subsCallbackIdx = subsCallbackIdxGen.next().value;
+                    html += `data-dom_subs_callback="${subsCallbackIdx}" `;
+                    state.callbackMap.set(subsCallbackIdx, callback);
+                }
+                html += '></state-subs>';
+                return html;
+            },
+            getState() {
+                const state = globalStateMap.get(atom.stateKey);
+                if (state.value instanceof Object) return {...state.value};
+                if (state.value instanceof Array) return [...state.value];
+                return state.value;
+            }
+        }
+    },
+    setGlobalState(atom) {
+        return (newVal) => {
+            const state = globalStateMap.get(atom.stateKey);
+            if (state.value === newVal) return;
+            state.value = newVal;
+            state.subsList = state.subsList.filter(subs => document.contains(subs.elem));
+            rerenderState(state);
+        }
+    },
+    useGlobalState(atom) {
+        return [
+            renderUtil.getGlobalState(atom),
+            renderUtil.setGlobalState(atom)
+        ]
+    },
+    resetGlobalState(atom) {
+        const state = globalStateMap.get(atom.stateKey);
+        if (state.value === state.default) return;
+        state.value = state.default;
+        state.subsList = state.subsList.filter(subs => document.contains(subs.elem));
+        rerenderState(state);
+    }
+}
+
+class DuplicateKeyError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = 'DuplicateKeyError';
     }
 }
 
@@ -227,6 +296,21 @@ export function safeXSS(unsafeHtml) {
         .replace(/&/g, '&amp;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
+}
+
+/**
+ * @param {RenderUtil.State} state
+ */
+function rerenderState(state) {
+    state.subsList.forEach(el => {
+        if (el.component) {
+            renderUtil.render(renderUtil.build(el.callback ? `${el.callback(state.value)}` : state.value), el.elem);
+        } else if (el.callback) {
+            el.elem.innerText = `${el.callback(state.value)}`;
+        } else {
+            el.elem.innerText = state.value;
+        }
+    });
 }
 
 function kebabStyleProperty(styleProperty) {

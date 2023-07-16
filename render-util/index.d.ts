@@ -5,6 +5,11 @@ declare namespace RenderUtil {
         build: (html: string, buildOptions?: BuildOptions) => string;
         domRef: <T extends Element>() => DomRef<T>;
         createState: <T>(initialState: T) => [StateObj<T>, (newVal: T) => void];
+        createGlobalState: <T>(option: GlobalStateInit<T>) => Atom<T>;
+        getGlobalState: <T>(atom: Atom<T>) => StateObj<T>;
+        setGlobalState: <T>(atom: Atom<T>) => (newVal: T) => void;
+        useGlobalState: <T>(atom: Atom<T>) => [StateObj<T>, (newVal: T) => void];
+        resetGlobalState: <T>(atom: Atom<T>) => void;
     }
 
     export interface BuildOptions {
@@ -27,12 +32,23 @@ declare namespace RenderUtil {
 
     export interface State {
         value: any;
-        subsList: {elem: HTMLElement, rendered?: boolean, callback?: Function, component?: boolean}[];
+        subsList: {elem: HTMLElement, callback?: Function, component?: boolean}[];
         callbackMap: Map<string, Function>;
+        default?: any;
+    }
+
+    export interface GlobalStateInit<T> {
+        key: string;
+        default: T;
+    }
+
+    export interface Atom<T> {
+        stateKey: string;
+        defaultValue: T;
     }
 
     export type CSSOptions = Partial<CSSStyleDeclaration>;
-    export type StateSubsMap = Map<string, State>
+    export type StateMap = Map<string, State>;
     export type StateObj<T> = { subs: Subs<T>, getState: () => T};
     export type Subs<T> = (type?: 'inline' | 'block' | 'component' | SubsCallback<T>, callback?: SubsCallback<T>) => string;
     type SubsCallback<T> = (state: T) => number | string;
