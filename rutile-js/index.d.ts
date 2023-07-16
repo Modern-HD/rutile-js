@@ -1,6 +1,6 @@
-declare namespace RenderUtil {
+declare namespace Rutile {
 
-    export interface RenderUtil {
+    export interface Rutile {
         render: (html: string, root: HTMLElement, renderOptions?: RenderOptions) => void;
         build: (html: string, buildOptions?: BuildOptions) => string;
         domRef: <T extends Element>() => DomRef<T>;

@@ -1,11 +1,11 @@
-import renderUtil from '../../render-util/index.js'
+import Rutile from '../../rutile-js/index.js'
 import Main from './components/Main.js'
 import Nav from './components/Nav.js';
 import NewFunction from './components/NewFunction.js'
 import MyName from "./components/MyName.js";
 
 const App = () => {
-    return renderUtil.build(`
+    return Rutile.build(`
         ${Nav()}
         ${Main()}
         ${NewFunction()}
@@ -13,4 +13,4 @@ const App = () => {
     `)
 }
 
-renderUtil.render(App(), document.getElementById('root'));
+Rutile.render(App(), document.getElementById('root'));

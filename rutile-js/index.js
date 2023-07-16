@@ -1,5 +1,5 @@
 /**
- * @typedef {import('./index')} RenderUtil
+ * @typedef {import('./index')} Rutile
  */
 
 const replaceTargetFunc = [
@@ -11,16 +11,16 @@ const replaceTargetFunc = [
 /** @type {Map<string, Function>} */
 const funcPrepareMap = new Map();
 
-/** @type {Map<string, RenderUtil.DomRef>} */
+/** @type {Map<string, Rutile.DomRef>} */
 const domRefMap = new Map();
 
 /** @type {Map<string, Function>} */
 const domReadyMap = new Map();
 
-/** @type {RenderUtil.StateMap} */
+/** @type {Rutile.StateMap} */
 const stateMap = new Map();
 
-/** @type {RenderUtil.StateMap} */
+/** @type {Rutile.StateMap} */
 const globalStateMap = new Map();
 
 /**
@@ -45,8 +45,8 @@ const domReadyIdxGen = idxGenerator('DOM_READY');
 const stateIdxGen = idxGenerator('DOM_SUBS');
 const subsCallbackIdxGen = idxGenerator('DOM_SUBS_CALL_BACK');
 
-/** @type {RenderUtil.RenderUtil} */
-const renderUtil = {
+/** @type {Rutile.Rutile} */
+const Rutile = {
     render(html, root, renderOptions ) {
         let htmlStr = html;
         const rendering = document.createElement('div');
@@ -89,7 +89,7 @@ const renderUtil = {
                 el.innerText = state.value;
             } else {
                 readyFunc.push(() => {
-                    renderUtil.render(renderUtil.build(callback ? `${callback(state.value)}` : state.value), el);
+                    Rutile.render(Rutile.build(callback ? `${callback(state.value)}` : state.value), el);
                 });
             }
             state.subsList.push({ elem: el, callback: callback, component: isComponent && isComponent === 'true' });
@@ -167,7 +167,7 @@ const renderUtil = {
         return htmlStr;
     },
     domRef() {
-        /** @type {RenderUtil.DomRef} */
+        /** @type {Rutile.DomRef} */
         const domRef = {
             current: null,
             set: domIdxGen.next().value
@@ -177,7 +177,7 @@ const renderUtil = {
     },
     createState(initialState) {
         const stateIdx = stateIdxGen.next().value;
-        /** @type {RenderUtil.State} */
+        /** @type {Rutile.State} */
         const state = { value: initialState, subsList: [], callbackMap: new Map() };
         stateMap.set(stateIdx, state);
 
@@ -212,7 +212,7 @@ const renderUtil = {
     },
     createGlobalState(option) {
         if (globalStateMap.has(option.key)) throw new DuplicateKeyError('globalState에서는 중복된 키를 사용하실 수 없습니다.');
-        /** @type {RenderUtil.State} */
+        /** @type {Rutile.State} */
         const state = { value: option.default, default: option.default, subsList: [], callbackMap: new Map() };
         globalStateMap.set(option.key, state);
         const defaultValue = state.default instanceof Object
@@ -265,8 +265,8 @@ const renderUtil = {
     },
     useGlobalState(atom) {
         return [
-            renderUtil.getGlobalState(atom),
-            renderUtil.setGlobalState(atom)
+            Rutile.getGlobalState(atom),
+            Rutile.setGlobalState(atom)
         ]
     },
     resetGlobalState(atom) {
@@ -299,12 +299,12 @@ export function safeXSS(unsafeHtml) {
 }
 
 /**
- * @param {RenderUtil.State} state
+ * @param {Rutile.State} state
  */
 function rerenderState(state) {
     state.subsList.forEach(el => {
         if (el.component) {
-            renderUtil.render(renderUtil.build(el.callback ? `${el.callback(state.value)}` : state.value), el.elem);
+            Rutile.render(Rutile.build(el.callback ? `${el.callback(state.value)}` : state.value), el.elem);
         } else if (el.callback) {
             el.elem.innerText = `${el.callback(state.value)}`;
         } else {
@@ -323,4 +323,4 @@ function kebabStyleProperty(styleProperty) {
         .join('');
 }
 
-export default renderUtil;
+export default Rutile;

@@ -1,10 +1,10 @@
-import renderUtil from "../../../render-util/index.js";
+import Rutile from "../../../rutile-js/index.js";
 import nameAtom from "../atom/nameAtom.js";
 
 export default function MyName() {
-    const name = renderUtil.getGlobalState(nameAtom);
+    const name = Rutile.getGlobalState(nameAtom);
 
-    return renderUtil.build(`
+    return Rutile.build(`
         <div>
             다른 컴포넌트
         </div>

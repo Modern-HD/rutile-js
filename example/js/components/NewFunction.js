@@ -1,25 +1,25 @@
-import renderUtil from "../../../render-util/index.js";
+import Rutile from "../../../rutile-js/index.js";
 import MoreInfo from "./MoreInfo.js";
 import nameAtom from "../atom/nameAtom.js";
 
 export default function NewFunction() {
 
-    const [count, setCount] = renderUtil.createState(0);
-    const [myObj, setMyObj] = renderUtil.createState({ count: 0 });
-    const [infoOpen, setInfoOpen] = renderUtil.createState(false);
-    const setName = renderUtil.setGlobalState(nameAtom);
+    const [count, setCount] = Rutile.createState(0);
+    const [myObj, setMyObj] = Rutile.createState({ count: 0 });
+    const [infoOpen, setInfoOpen] = Rutile.createState(false);
+    const setName = Rutile.setGlobalState(nameAtom);
 
-    /** @type {RenderUtil.CSSOptions} */
+    /** @type {Rutile.CSSOptions} */
     const paragraphStyle = {
         marginTop: '0px',
         marginBottom: '2px',
     }
 
     const onIncrement = () => { setCount(count.getState() + 1) };
-    /** @type {RenderUtil.DomRef<HTMLInputElement>} */
-    const nameInput = renderUtil.domRef();
+    /** @type {Rutile.DomRef<HTMLInputElement>} */
+    const nameInput = Rutile.domRef();
 
-    return renderUtil.build(`
+    return Rutile.build(`
         <h3>2023-07 신기능: createState</h3>
         <p>새로운 상태를 만들고, 상태가 바뀌면 그 부분만 재렌더링 된다.</p>
         <div style="margin-bottom: 5px">
@@ -57,7 +57,7 @@ export default function NewFunction() {
             },
             onToggleInfo: () => { setInfoOpen(!infoOpen.getState()) },
             onRename: () => { setName(nameInput.current.value) },
-            onNameReset: () => { renderUtil.resetGlobalState(nameAtom) }
+            onNameReset: () => { Rutile.resetGlobalState(nameAtom) }
         },
         stylePrepare: {
             paragraphStyle: paragraphStyle

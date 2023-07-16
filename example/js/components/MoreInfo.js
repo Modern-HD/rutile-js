@@ -1,4 +1,4 @@
-import renderUtil from "../../../render-util/index.js";
+import Rutile from "../../../rutile-js/index.js";
 
 /**
  * @param {number} count
@@ -7,7 +7,7 @@ import renderUtil from "../../../render-util/index.js";
  */
 export default function MoreInfo({count, onIncrement}) {
 
-    return renderUtil.build(`
+    return Rutile.build(`
         <div>
             저는 MoreInfo 컴포넌트 입니다.
             <p>

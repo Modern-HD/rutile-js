@@ -1,8 +1,8 @@
-import renderUtil from '../../../render-util/index.js'
+import Rutile from '../../../rutile-js/index.js'
 
 export default function Nav() {
 
-    /** @type {RenderUtil.CSSOptions} */
+    /** @type {Rutile.CSSOptions} */
     const navStyle = {
         padding: '5px',
         width: '100%',
@@ -12,7 +12,7 @@ export default function Nav() {
         fontSize: '1.5em'
     }
 
-    return renderUtil.build(`
+    return Rutile.build(`
         <nav style="{navStyle}">
             내비
         </nav>
