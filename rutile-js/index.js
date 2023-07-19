@@ -48,7 +48,8 @@ const subsCallbackIdxGen = idxGenerator('DOM_SUBS_CALL_BACK');
 /** @type {Rutile.Rutile} */
 const Rutile = {
     render(html, root, renderOptions ) {
-        let htmlStr = html;
+        const eventAttributesPattern = /<(.*?)\s+(on\w+)\s*=\s*(['"])(.*?)\3/gi;
+        const htmlStr = html.replaceAll(eventAttributesPattern, "");
         const rendering = document.createElement('div');
         const readyFunc = [];
         rendering.innerHTML = htmlStr;
