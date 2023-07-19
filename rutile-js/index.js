@@ -2,6 +2,13 @@
  * @typedef {import('./index')} Rutile
  */
 
+const DANGER_WORD = [
+    "javascript", "script", "<iframe", "vbscript", "applet", "embed",
+    "<object", "<frame", "onblur=", "onchange=", "onclick=", "ondblclick=",
+    "enerror=", "onfocus=", "onload=", "onmouse=", "onscroll=", "onsubmit=",
+    "onunload=", "onerror="
+];
+
 const replaceTargetFunc = [
     { origin: "onClick", fix: "onclick" },
     { origin: "onChange", fix: "onchange" },
@@ -48,18 +55,18 @@ const subsCallbackIdxGen = idxGenerator('DOM_SUBS_CALL_BACK');
 /** @type {Rutile.Rutile} */
 const Rutile = {
     render(html, root, renderOptions ) {
-        const eventAttributesPattern = /<(.*?)\s+(on\w+)\s*=\s*(['"])(.*?)\3/gi;
+        const eventAttributesPattern = new RegExp(DANGER_WORD.join("|"), "gi");
         const htmlStr = html.replaceAll(eventAttributesPattern, "");
         const rendering = document.createElement('div');
         const readyFunc = [];
         rendering.innerHTML = htmlStr;
-        replaceTargetFunc.forEach(target => {
-            rendering.querySelectorAll(`div [data-func_prepare_${target.fix}]`).forEach(el => {
+        replaceTargetFunc.forEach((target, i) => {
+            rendering.querySelectorAll(`div [data-func_prepare_${i}]`).forEach(el => {
                 let temp;
-                const funcName = el.dataset[`func_prepare_${target.fix}`];
-                if (temp = funcPrepareMap.get(funcName)) el[target.fix] = temp;
-                delete el.dataset[`func_prepare_${target.fix}`];
-                !rendering.querySelector(`[data-func_prepare_${target.fix}="${funcName}"]`) && funcPrepareMap.delete(funcName);
+                const funcName = el.dataset[`func_prepare_${i}`];
+                if ((temp = funcPrepareMap.get(funcName))) el[target.fix] = temp;
+                delete el.dataset[`func_prepare_${i}`];
+                !rendering.querySelector(`[data-func_prepare_${i}="${funcName}"]`) && funcPrepareMap.delete(funcName);
             })
         });
         rendering.querySelectorAll(`div [ref]`).forEach(el => {
@@ -84,14 +91,14 @@ const Rutile = {
             const isComponent = el.dataset['dom_subs_component'];
             const subsCallbackIdx = el.dataset['dom_subs_callback'];
             const callback = subsCallbackIdx ? state.callbackMap.get(subsCallbackIdx) : undefined;
-            if (subsCallbackIdx && callback && !isComponent) {
-                el.innerText = `${callback(state.value)}`;
-            } else if (!isComponent) {
-                el.innerText = state.value;
-            } else {
+            if (isComponent) {
                 readyFunc.push(() => {
                     Rutile.render(Rutile.build(callback ? `${callback(state.value)}` : state.value), el);
                 });
+            } else if (callback) {
+                el.innerText = safeXSS(`${callback(state.value)}`);
+            } else {
+                el.innerText = safeXSS(`${state.value}`);
             }
             state.subsList.push({ elem: el, callback: callback, component: isComponent && isComponent === 'true' });
             delete el.dataset['dom_subs'];
@@ -122,7 +129,7 @@ const Rutile = {
         if (!buildOptions) { return html; }
         let htmlStr = html;
         if (buildOptions.eventPrepare) {
-            replaceTargetFunc.forEach(target => {
+            replaceTargetFunc.forEach((target, i) => {
                 const regexStr = `${target.origin}="{(.*?)}\"`;
                 const regex = new RegExp(regexStr, 'g');
                 let temp;
@@ -132,7 +139,7 @@ const Rutile = {
                     temp = name;
                     if (!buildOptions.eventPrepare[name]) continue;
                     const newFuncName = funcIdxGen.next().value;
-                    htmlStr = htmlStr.replaceAll(`${target.origin}="{${name}}"`, `data-func_prepare_${target.fix}="${newFuncName}"`);
+                    htmlStr = htmlStr.replaceAll(`${target.origin}="{${name}}"`, `data-func_prepare_${i}="${newFuncName}"`);
                     funcPrepareMap.set(newFuncName, buildOptions.eventPrepare[name]);
                 }
             });
@@ -307,9 +314,9 @@ function rerenderState(state) {
         if (el.component) {
             Rutile.render(Rutile.build(el.callback ? `${el.callback(state.value)}` : state.value), el.elem);
         } else if (el.callback) {
-            el.elem.innerText = `${el.callback(state.value)}`;
+            el.elem.innerText = safeXSS(`${el.callback(state.value)}`);
         } else {
-            el.elem.innerText = state.value;
+            el.elem.innerText = safeXSS(`${state.value}`);
         }
     });
 }
