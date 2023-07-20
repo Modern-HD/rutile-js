@@ -4,9 +4,9 @@
 
 const DANGER_WORD = [
     "javascript", "script", "<iframe", "vbscript", "applet", "embed",
-    "<object", "<frame", "onblur=", "onchange=", "onclick=", "ondblclick=",
-    "enerror=", "onfocus=", "onload=", "onmouse=", "onscroll=", "onsubmit=",
-    "onunload=", "onerror="
+    "<object", "<frame", "onblur", "onchange", "onclick", "ondblclick",
+    "enerror", "onfocus", "onload", "onmouse", "onscroll", "onsubmit",
+    "onunload", "onerror"
 ];
 
 const replaceTargetFunc = [
