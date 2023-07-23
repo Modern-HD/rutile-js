@@ -4,11 +4,11 @@ declare namespace Rutile {
         render: (html: string, root: HTMLElement, renderOptions?: RenderOptions) => void;
         build: (html: string, buildOptions?: BuildOptions) => string;
         domRef: <T extends Element>() => DomRef<T>;
-        createState: <T>(initialState: T) => [StateObj<T>, (newVal: T) => void];
+        createState: <T>(initialState: T) => [StateObj<T>, Dispatch<T>];
         createGlobalState: <T>(option: GlobalStateInit<T>) => Atom<T>;
         getGlobalState: <T>(atom: Atom<T>) => StateObj<T>;
-        setGlobalState: <T>(atom: Atom<T>) => (newVal: T) => void;
-        useGlobalState: <T>(atom: Atom<T>) => [StateObj<T>, (newVal: T) => void];
+        setGlobalState: <T>(atom: Atom<T>) => Dispatch<T>;
+        useGlobalState: <T>(atom: Atom<T>) => [StateObj<T>, Dispatch<T>];
         resetGlobalState: <T>(atom: Atom<T>) => void;
     }
 
@@ -50,6 +50,7 @@ declare namespace Rutile {
     export type CSSOptions = Partial<CSSStyleDeclaration>;
     export type StateMap = Map<string, State>;
     export type StateObj<T> = { subs: Subs<T>, getState: () => T};
+    export type Dispatch<T> = (newVal: T) => void;
     export type Subs<T> = (type?: 'inline' | 'block' | 'component' | SubsCallback<T>, callback?: SubsCallback<T>) => string;
     type SubsCallback<T> = (state: T) => number | string;
 }
