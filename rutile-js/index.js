@@ -56,7 +56,7 @@ const subsCallbackIdxGen = idxGenerator('DOM_SUBS_CALL_BACK');
 const Rutile = {
     render(html, root, renderOptions ) {
         const eventAttributesPattern = new RegExp(DANGER_WORD.join("|"), "gi");
-        const htmlStr = html.replaceAll(eventAttributesPattern, "");
+        const htmlStr = html.replaceAll(eventAttributesPattern, "x");
         const rendering = document.createElement('div');
         const readyFunc = [];
         rendering.innerHTML = htmlStr;
