@@ -3,16 +3,32 @@
  */
 
 const DANGER_WORD = [
-    "javascript", "script", "<iframe", "vbscript", "applet", "embed",
-    "<object", "<frame", "onblur", "onchange", "onclick", "ondblclick",
-    "enerror", "onfocus", "onload", "onmouse", "onscroll", "onsubmit",
-    "onunload", "onerror"
+    'javascript',
+    'script',
+    '<iframe',
+    'vbscript',
+    'applet',
+    'embed',
+    '<object',
+    '<frame',
+    'onblur',
+    'onchange',
+    'onclick',
+    'ondblclick',
+    'enerror',
+    'onfocus',
+    'onload',
+    'onmouse',
+    'onscroll',
+    'onsubmit',
+    'onunload',
+    'onerror',
 ];
 
 const replaceTargetFunc = [
-    { origin: "onClick", fix: "onclick" },
-    { origin: "onChange", fix: "onchange" },
-    { origin: "onInput", fix: "oninput" }
+    { origin: 'onClick', fix: 'onclick' },
+    { origin: 'onChange', fix: 'onchange' },
+    { origin: 'onInput', fix: 'oninput' },
 ];
 
 /** @type {Map<string, Function>} */
@@ -54,9 +70,9 @@ const subsCallbackIdxGen = idxGenerator('DOM_SUBS_CALL_BACK');
 
 /** @type {Rutile.Rutile} */
 const Rutile = {
-    render(html, root, renderOptions ) {
-        const eventAttributesPattern = new RegExp(DANGER_WORD.join("|"), "gi");
-        const htmlStr = html.replaceAll(eventAttributesPattern, "x");
+    render(html, root, renderOptions) {
+        const eventAttributesPattern = new RegExp(DANGER_WORD.join('|'), 'gi');
+        const htmlStr = html.replaceAll(eventAttributesPattern, 'x');
         const rendering = document.createElement('div');
         const readyFunc = [];
         rendering.innerHTML = htmlStr;
@@ -67,12 +83,12 @@ const Rutile = {
                 if ((temp = funcPrepareMap.get(funcName))) el[target.fix] = temp;
                 delete el.dataset[`func_prepare_${i}`];
                 !rendering.querySelector(`[data-func_prepare_${i}="${funcName}"]`) && funcPrepareMap.delete(funcName);
-            })
+            });
         });
         rendering.querySelectorAll(`div [ref]`).forEach(el => {
-            const refIdx = el.getAttribute("ref");
+            const refIdx = el.getAttribute('ref');
             domRefMap.get(refIdx).current = el;
-            el.removeAttribute("ref");
+            el.removeAttribute('ref');
             domRefMap.delete(refIdx);
         });
         rendering.querySelectorAll(`div dom-ready-event[data-dom_ready]`).forEach(el => {
@@ -126,7 +142,9 @@ const Rutile = {
         });
     },
     build(html, buildOptions) {
-        if (!buildOptions) { return html; }
+        if (!buildOptions) {
+            return html;
+        }
         let htmlStr = html;
         if (buildOptions.eventPrepare) {
             replaceTargetFunc.forEach((target, i) => {
@@ -139,7 +157,10 @@ const Rutile = {
                     temp = name;
                     if (!buildOptions.eventPrepare[name]) continue;
                     const newFuncName = funcIdxGen.next().value;
-                    htmlStr = htmlStr.replaceAll(`${target.origin}="{${name}}"`, `data-func_prepare_${i}="${newFuncName}"`);
+                    htmlStr = htmlStr.replaceAll(
+                        `${target.origin}="{${name}}"`,
+                        `data-func_prepare_${i}="${newFuncName}"`
+                    );
                     funcPrepareMap.set(newFuncName, buildOptions.eventPrepare[name]);
                 }
             });
@@ -150,7 +171,7 @@ const Rutile = {
             for (const match of htmlStr.matchAll(regex)) {
                 const name = match[1].substring(1, match[1].length - 1);
                 if (!buildOptions.stylePrepare[name]) continue;
-                let style = "";
+                let style = '';
                 for (const key in buildOptions.stylePrepare[name]) {
                     style += `${kebabStyleProperty(key)}: ${buildOptions.stylePrepare[name][key]}; `;
                 }
@@ -168,8 +189,8 @@ const Rutile = {
                 buildOptions.domReady.forEach(func => {
                     const idx = domReadyIdxGen.next().value;
                     domReadyMap.set(idx, func);
-                    htmlStr += (`<dom-ready-event data-dom_ready="${idx}"></dom-ready-event> `)
-                })
+                    htmlStr += `<dom-ready-event data-dom_ready="${idx}"></dom-ready-event> `;
+                });
             }
         }
         return htmlStr;
@@ -178,8 +199,8 @@ const Rutile = {
         /** @type {Rutile.DomRef} */
         const domRef = {
             current: null,
-            set: domIdxGen.next().value
-        }
+            set: domIdxGen.next().value,
+        };
         domRefMap.set(domRef.set, domRef);
         return domRef;
     },
@@ -189,50 +210,57 @@ const Rutile = {
         const state = { value: initialState, subsList: [], callbackMap: new Map() };
         stateMap.set(stateIdx, state);
 
-        return [{
-            subs(type = 'inline', callback) {
-                if (type instanceof Function) {
-                    callback = type;
-                    type = 'inline';
-                }
-                let html = `<state-subs data-dom_subs="${stateIdx}" ${type === 'block' ? 'style="display: block;"' : ''} `;
-                if (type === 'component') {
-                    html += 'data-dom_subs_component="true" ';
-                }
-                if (callback instanceof Function) {
-                    const subsCallbackIdx = subsCallbackIdxGen.next().value;
-                    html += `data-dom_subs_callback="${subsCallbackIdx}" `;
-                    state.callbackMap.set(subsCallbackIdx, callback);
-                }
-                html += '></state-subs>';
-                return html;
+        return [
+            {
+                subs(type = 'inline', callback) {
+                    if (type instanceof Function) {
+                        callback = type;
+                        type = 'inline';
+                    }
+                    let html = `<state-subs data-dom_subs="${stateIdx}" ${
+                        type === 'block' ? 'style="display: block;"' : ''
+                    } `;
+                    if (type === 'component') {
+                        html += 'data-dom_subs_component="true" ';
+                    }
+                    if (callback instanceof Function) {
+                        const subsCallbackIdx = subsCallbackIdxGen.next().value;
+                        html += `data-dom_subs_callback="${subsCallbackIdx}" `;
+                        state.callbackMap.set(subsCallbackIdx, callback);
+                    }
+                    html += '></state-subs>';
+                    return html;
+                },
+                getState() {
+                    if (state.value instanceof Object) return { ...state.value };
+                    if (state.value instanceof Array) return [...state.value];
+                    return state.value;
+                },
             },
-            getState() {
-                if (state.value instanceof Object) return {...state.value};
-                if (state.value instanceof Array) return [...state.value];
-                return state.value;
+            newValue => {
+                if (state.value === newValue) return;
+                state.value = newValue;
+                rerenderState(state);
             },
-        }, (newValue) => {
-            if (state.value === newValue) return;
-            state.value = newValue;
-            rerenderState(state);
-        }];
+        ];
     },
     createGlobalState(option) {
-        if (globalStateMap.has(option.key)) throw new DuplicateKeyError('globalState에서는 중복된 키를 사용하실 수 없습니다.');
+        if (globalStateMap.has(option.key))
+            throw new DuplicateKeyError('globalState에서는 중복된 키를 사용하실 수 없습니다.');
         /** @type {Rutile.State} */
         const state = { value: option.default, default: option.default, subsList: [], callbackMap: new Map() };
         globalStateMap.set(option.key, state);
-        const defaultValue = state.default instanceof Object
-                                    ? {...state.default}
-                            : state.default instanceof Array
-                                    ? [...state.default]
-                                    : state.default;
+        const defaultValue =
+            state.default instanceof Object
+                ? { ...state.default }
+                : state.default instanceof Array
+                ? [...state.default]
+                : state.default;
 
         return {
             stateKey: option.key,
-            defaultValue
-        }
+            defaultValue,
+        };
     },
     getGlobalState(atom) {
         return {
@@ -241,7 +269,9 @@ const Rutile = {
                     callback = type;
                     type = 'inline';
                 }
-                let html = `<state-subs data-dom_global_subs="${atom.stateKey}" ${type === 'block' ? 'style="display: block;"' : ''} `;
+                let html = `<state-subs data-dom_global_subs="${atom.stateKey}" ${
+                    type === 'block' ? 'style="display: block;"' : ''
+                } `;
                 if (type === 'component') {
                     html += 'data-dom_subs_component="true" ';
                 }
@@ -256,26 +286,23 @@ const Rutile = {
             },
             getState() {
                 const state = globalStateMap.get(atom.stateKey);
-                if (state.value instanceof Object) return {...state.value};
+                if (state.value instanceof Object) return { ...state.value };
                 if (state.value instanceof Array) return [...state.value];
                 return state.value;
-            }
-        }
+            },
+        };
     },
     setGlobalState(atom) {
-        return (newVal) => {
+        return newVal => {
             const state = globalStateMap.get(atom.stateKey);
             if (state.value === newVal) return;
             state.value = newVal;
             state.subsList = state.subsList.filter(subs => document.contains(subs.elem));
             rerenderState(state);
-        }
+        };
     },
     useGlobalState(atom) {
-        return [
-            Rutile.getGlobalState(atom),
-            Rutile.setGlobalState(atom)
-        ]
+        return [Rutile.getGlobalState(atom), Rutile.setGlobalState(atom)];
     },
     resetGlobalState(atom) {
         const state = globalStateMap.get(atom.stateKey);
@@ -283,8 +310,8 @@ const Rutile = {
         state.value = state.default;
         state.subsList = state.subsList.filter(subs => document.contains(subs.elem));
         rerenderState(state);
-    }
-}
+    },
+};
 
 class DuplicateKeyError extends Error {
     constructor(message) {
