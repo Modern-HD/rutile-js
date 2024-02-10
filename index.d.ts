@@ -58,3 +58,6 @@ declare namespace Rutile {
     ) => string;
     type SubsCallback<T> = (state: T) => number | string;
 }
+
+declare var Rutile: Rutile.Rutile;
+export = Rutile;
