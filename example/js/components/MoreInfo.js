@@ -1,13 +1,13 @@
-import Rutile from "../../../rutile-js/index.js";
+import Rutile from '../../../es/index.js';
 
 /**
  * @param {number} count
  * @param {Function} onIncrement
  * @returns {string}
  */
-export default function MoreInfo({count, onIncrement}) {
-
-    return Rutile.build(`
+export default function MoreInfo({ count, onIncrement }) {
+    return Rutile.build(
+        `
         <div>
             저는 MoreInfo 컴포넌트 입니다.
             <p>
@@ -15,9 +15,11 @@ export default function MoreInfo({count, onIncrement}) {
                 카운트2: ${count} <button onClick="{onIncrement}">+1</button>
             </p>
         </div>
-    `, {
-        eventPrepare: {
-            onIncrement
+    `,
+        {
+            eventPrepare: {
+                onIncrement,
+            },
         }
-    })
+    );
 }

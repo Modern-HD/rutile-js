@@ -1,0 +1,13 @@
+{
+  "name": "rutile-js",
+  "version": "1.0.0",
+  "description": "A declarative UI library without transpiler",
+  "repository": "https://github.com/Modern-HD/rutile-js.git",
+  "author": "modern-hd",
+  "files": ["umd", "es", "cjs", "index.d.ts"],
+  "main": "cjs/index.js",
+  "module": "es/index.js",
+  "unpkg": "umd/index.js",
+  "types": "index.d.ts",
+  "license": "MIT"
+}

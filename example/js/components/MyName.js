@@ -1,5 +1,5 @@
-import Rutile from "../../../rutile-js/index.js";
-import nameAtom from "../atom/nameAtom.js";
+import Rutile from '../../../es/index.js';
+import nameAtom from '../atom/nameAtom.js';
 
 export default function MyName() {
     const name = Rutile.getGlobalState(nameAtom);
@@ -11,5 +11,5 @@ export default function MyName() {
         <div>
             내 이름은? ${name.subs()}
         </div>
-    `)
+    `);
 }

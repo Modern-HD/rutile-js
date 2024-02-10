@@ -1,8 +1,8 @@
-import Rutile from "../../../rutile-js/index.js";
+import Rutile from '../../../es/index.js';
 
 const nameAtom = Rutile.createGlobalState({
     key: 'name',
-    default: 'kim'
+    default: 'kim',
 });
 
 // const duplicateNameAtom = Rutile.createGlobalState({
