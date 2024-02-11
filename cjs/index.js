@@ -65,7 +65,7 @@ const Rutile = (function () {
     const subsCallbackIdxGen = idxGenerator('DOM_SUBS_CALL_BACK');
 
     /** @type {Rutile.Rutile} */
-    const Rutile = {
+    const rutile = {
         render(html, root, renderOptions) {
             const eventAttributesPattern = new RegExp(DANGER_WORD.join('|'), 'gi');
             const htmlStr = html.replace(eventAttributesPattern, 'x');
@@ -109,12 +109,12 @@ const Rutile = (function () {
                 const callback = subsCallbackIdx ? state.callbackMap.get(subsCallbackIdx) : undefined;
                 if (isComponent) {
                     readyFunc.push(() => {
-                        Rutile.render(Rutile.build(callback ? `${callback(state.value)}` : state.value), el);
+                        rutile.render(rutile.build(callback ? `${callback(state.value)}` : state.value), el);
                     });
                 } else if (callback) {
-                    el.innerText = Rutile.safeXSS(`${callback(state.value)}`);
+                    el.innerText = rutile.safeXSS(`${callback(state.value)}`);
                 } else {
-                    el.innerText = Rutile.safeXSS(`${state.value}`);
+                    el.innerText = rutile.safeXSS(`${state.value}`);
                 }
                 state.subsList.push({ elem: el, callback: callback, component: isComponent && isComponent === 'true' });
                 delete el.dataset['dom_subs'];
@@ -302,7 +302,7 @@ const Rutile = (function () {
             };
         },
         useGlobalState(atom) {
-            return [Rutile.getGlobalState(atom), Rutile.setGlobalState(atom)];
+            return [rutile.getGlobalState(atom), rutile.setGlobalState(atom)];
         },
         resetGlobalState(atom) {
             const state = globalStateMap.get(atom.stateKey);
@@ -332,11 +332,11 @@ const Rutile = (function () {
     function rerenderState(state) {
         state.subsList.forEach(el => {
             if (el.component) {
-                Rutile.render(Rutile.build(el.callback ? `${el.callback(state.value)}` : state.value), el.elem);
+                rutile.render(rutile.build(el.callback ? `${el.callback(state.value)}` : state.value), el.elem);
             } else if (el.callback) {
-                el.elem.innerText = Rutile.safeXSS(`${el.callback(state.value)}`);
+                el.elem.innerText = rutile.safeXSS(`${el.callback(state.value)}`);
             } else {
-                el.elem.innerText = Rutile.safeXSS(`${state.value}`);
+                el.elem.innerText = rutile.safeXSS(`${state.value}`);
             }
         });
     }
@@ -351,7 +351,7 @@ const Rutile = (function () {
             .join('');
     }
 
-    return Rutile;
+    return rutile;
 })();
 
 module.exports = Rutile;
